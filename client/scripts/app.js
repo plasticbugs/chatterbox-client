@@ -34,25 +34,25 @@ var app = {
         // var.responseText = data.responseText;
         // loop through each result and look at the text
           // strip out the left bracket things
-        window.trash = data.results;
         for (var i = 0; i < data.results.length; i++) {
-          // var re1 = /</;
-          // var re2 = />/;
+          // if there is no text in the message
           if (!data.results[i].text) {
-            data.results[i].text = ' ';
-          }
-          var textToChange = data.results[i].text;
-          var newText = textToChange.replace(/</g, 'java');
-          var newText = newText.replace(/>/g, ' is fun! ');
-          data.results[i].text = newText;
+            // splice out the empty message
+            data.results.splice(i,1);
+          } else {
+            var textToChange = data.results[i].text;
+            var newText = textToChange.replace(/</g, 'java');
+            var newText = newText.replace(/>/g, ' is fun! ');
+            data.results[i].text = newText;
 
-          if (!data.results[i].username) {
-            data.results[i].username = ' ';
+            if (!data.results[i].username) {
+              data.results[i].username = ' ';
+            }
+            var nameToChange = data.results[i].username;
+            var newName = nameToChange.replace(/</g, 'java');
+            var newName = newName.replace(/>/g, ' is fun! ');
+            data.results[i].username = newName;
           }
-          var nameToChange = data.results[i].username;
-          var newName = nameToChange.replace(/</g, 'java');
-          var newName = newName.replace(/>/g, ' is fun! ');
-          data.results[i].username = newName;
 
 
         }
@@ -64,7 +64,7 @@ var app = {
 
         for (var i = 0; i < data.results.length; i++) {
           var chat = data.results[i];
-
+          // render the chat element to the screen
           // take the message's room name and add it to a property so we can
           if (data.results[i].roomname && app.allRooms[data.results[i].roomname] === undefined) {
             app.allRooms[data.results[i].roomname] = [data.results[i]];
@@ -73,7 +73,6 @@ var app = {
           }
           // iterate over the property's keys to get all the possible room names
         }
-
         // set up our dropdown here;
         var dropdown = $('#roomSelect');
         for (var key in app.allRooms) {
@@ -81,8 +80,15 @@ var app = {
           dropdown.append(element);
         // set up the input on the page
         }
+        $( "select" ).change(function() {
+    //var str = "";
+          $( "select option:selected" ).each(function() {
+            app.renderRoom($( this ).text());
+          });
+        //this calls render room
+        }).trigger( "change" );
+        // set up the dropdown event listeners
 
-        window.test = data.results;
         return true;
       },
       error: function (data) {
@@ -106,16 +112,30 @@ var app = {
 
   renderMessage: function (message) {
     var chat = `<div class='chat'><p class='username'>${message.username}</p><p class='text'>${message.text}</p></div>`;
-    $('#chats').prepend(chat);
+    $('#chats').append(chat);
   },
 
   renderRoom: function (roomName) {
+
+    if (!app.allRooms[roomName]) {
+      var dropdown = $('#roomSelect');
+      var element = `<option value='${roomName}'>${roomName}</option>`;
+      dropdown.append(element);
+    }
+
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
       url: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt&where={"roomname":"' + roomName + '"}',
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
+        app.clearMessages();
+        // loop through the data
+        _.each(data.results, function(message) {
+        // render each message
+          app.renderMessage(message);
+        });
+
         window.trash = data;
         console.log('chatterbox: Message sent');
       },
