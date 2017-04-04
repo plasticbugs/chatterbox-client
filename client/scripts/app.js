@@ -1,6 +1,7 @@
 var app = {
   server: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt',
   allRooms: {},
+  friends: {},
   init: function () {
     app.fetch();
     // console.log(app.allRooms) // undefined;
@@ -83,7 +84,7 @@ var app = {
         $( "select" ).change(function() {
     //var str = "";
           $( "select option:selected" ).each(function() {
-            app.renderRoom($( this ).text());
+            app.renderRoom($(this).text());
           });
         //this calls render room
         }).trigger( "change" );
@@ -111,8 +112,9 @@ var app = {
   },
 
   renderMessage: function (message) {
-    var chat = `<div class='chat'><p class='username'>${message.username}</p><p class='text'>${message.text}</p></div>`;
+    var chat = `<div class='chat'><a class='username' href="#">${message.username}</a><p class='text'>${message.text}</p></div>`;
     $('#chats').append(chat);
+    $('.username').on('click', app.handleUsernameClick);
   },
 
   renderRoom: function (roomName) {
@@ -136,7 +138,7 @@ var app = {
           app.renderMessage(message);
         });
 
-        window.trash = data;
+
         console.log('chatterbox: Message sent');
       },
       error: function (data) {
@@ -144,8 +146,9 @@ var app = {
         console.error('chatterbox: Failed to send message', data);
       }
     });
-
-
+  },
+  handleUsernameClick: function () {
+    app.friends[$(this).text()] = $(this).text();
   }
 };
 
@@ -156,7 +159,8 @@ app.init();
 
 
 
-
+// on click of username
+// add user to app.friends
 
 
 
