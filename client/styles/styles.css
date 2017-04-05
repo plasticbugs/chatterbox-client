@@ -100,3 +100,25 @@ p {
     font-size: 0.8em;
 }
 
+#message {
+    width: 200px;
+    height: 50px;
+    border: 3px solid #cccccc;
+    padding: 5px;
+    font-family: Tahoma, sans-serif;
+    margin-top: 30px;
+    resize: none;
+}
+a {
+    text-decoration: none;
+    color: #333;
+}
+
+a:hover {
+    color: #D01C65;
+}
+
+select{
+    width: 100px;
+    text-overflow: ellipsis;
+}
