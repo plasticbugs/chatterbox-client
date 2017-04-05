@@ -2,14 +2,38 @@ var app = {
   server: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt',
   allRooms: {},
   friends: {},
+  currentRoom: '',
   init: function () {
     app.fetch();
-    // console.log(app.allRooms) // undefined;
+    $(document).ready(function() {
+      if (!app.ranTheThing) {
+        $('#send').on('submit', function (event) {
+          event.preventDefault(); 
+          app.handleSubmit();
+        });
+        app.ranTheThing = 1;
+      }
+      $('.new-room').on('click', function () {
+        var roomToCreate = prompt('What room name?') || 'lobby';
+        if (app.allRooms[roomToCreate] === undefined) {
+          app.allRooms[roomToCreate] = [];
+          var dropdown = $('#roomSelect');
+          var element = `<option value='${roomToCreate}'>${roomToCreate}</option>`;
+          dropdown.append(element);
+          $("select option[value='" + roomToCreate +"']").attr('selected','selected');
+        }
+        app.renderRoom(roomToCreate);
+      });
+    });
+    
+    setInterval(function () {
+      app.renderRoom(app.currentRoom);
+    }, 2500);
   },
   
   send: function (message) {
     $.ajax({
-      url: this.server,
+      url: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages',
       type: 'POST',
       data: JSON.stringify(message),
       contentType: 'application/json',
@@ -112,12 +136,24 @@ var app = {
   },
 
   renderMessage: function (message) {
-    var chat = `<div class='chat'><a class='username' href="#">${message.username}</a><p class='text'>${message.text}</p></div>`;
+    var classes;
+    if (app.friends.hasOwnProperty(message.username)) {
+      // parse the chat string into a jquery obj
+      classes = 'username friend';
+    } else {
+      classes = 'username';
+    }
+    var chat = `<div class='chat'><a class='${classes}' href="#">${message.username}</a><p class='text'>${message.text}</p></div>`;
     $('#chats').append(chat);
-    $('.username').on('click', app.handleUsernameClick);
+    $('.username').on('click', function(event) {
+      event.preventDefault();
+      app.handleUsernameClick.call(this);
+    });
+
   },
 
   renderRoom: function (roomName) {
+    app.currentRoom = roomName;
 
     if (!app.allRooms[roomName]) {
       var dropdown = $('#roomSelect');
@@ -139,7 +175,7 @@ var app = {
         });
 
 
-        console.log('chatterbox: Message sent');
+        // console.log('chatterbox: Message sent');
       },
       error: function (data) {
       // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -149,6 +185,15 @@ var app = {
   },
   handleUsernameClick: function () {
     app.friends[$(this).text()] = $(this).text();
+  },
+  handleSubmit: function () {
+    var message = {
+      username: window.location.search.slice(10),
+      text: $('#message').val(),
+      roomname: app.currentRoom
+    };
+    app.send(message);
+    $('#message').val('');
   }
 };
 
