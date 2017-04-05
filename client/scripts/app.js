@@ -3,6 +3,7 @@ var app = {
   allRooms: {},
   friends: {},
   currentRoom: '',
+
   init: function () {
     app.fetch();
     $(document).ready(function() {
@@ -46,10 +47,8 @@ var app = {
       }
     });
   },
+
   fetch: function () {
-    // var dataObject = {
-    //   "roomname": roomName
-    // }
     $.ajax({
       url: this.server,
       type: 'GET',
@@ -59,8 +58,6 @@ var app = {
       },
       success: function (data) {
         console.log('fetch successful');
-        // prepend the data to the page
-
         for (var i = 0; i < data.results.length; i++) {
           var chat = data.results[i];
           // render the chat element to the screen
@@ -80,7 +77,6 @@ var app = {
         // set up the input on the page
         }
         $( "select" ).change(function() {
-    //var str = "";
           $( "select option:selected" ).each(function() {
             app.renderRoom($(this).text());
           });
@@ -93,14 +89,6 @@ var app = {
       error: function (data) {
         // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
         console.error('chatterbox: Failed to get messages', data);
-      },
-      complete: function () {
-        // var dropdown = $('#roomSelect');
-        // for (var key in app.allRooms) {
-        //   // set up the input on the page
-
-        // }
-
       }
     });
   },
@@ -123,7 +111,6 @@ var app = {
       event.preventDefault();
       app.handleUsernameClick.call(this);
     });
-
   },
 
   renderRoom: function (roomName) {
@@ -136,33 +123,28 @@ var app = {
     }
 
     $.ajax({
-    // This is the url you should use to communicate with the parse API server.
       url: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt&where={"roomname":"' + roomName + '"}',
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
         app.clearMessages();
-        // loop through the data
         _.each(data.results, function(message) {
-        // render each message
           app.renderMessage(message);
         });
-
-
-        // console.log('chatterbox: Message sent');
       },
       dataFilter: function(data) {
         return app.scrubData(data);
       },
       error: function (data) {
-      // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
         console.error('chatterbox: Failed to send message', data);
       }
     });
   },
+
   handleUsernameClick: function () {
     app.friends[$(this).text()] = $(this).text();
   },
+
   handleSubmit: function () {
     var message = {
       username: window.location.search.slice(10),
@@ -172,6 +154,7 @@ var app = {
     app.send(message);
     $('#message').val('');
   },
+  
   scrubData: function(data) {
     var data = JSON.parse(data);
     for (var i = 0; i < data.results.length; i++) {
@@ -200,16 +183,4 @@ var app = {
 
 
 app.init();
-
-
-
-
-
-// on click of username
-// add user to app.friends
-
-
-
-
-
 
