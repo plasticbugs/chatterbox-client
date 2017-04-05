@@ -1,5 +1,5 @@
 var app = {
-  server: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt&limit=500',
+  server: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt',
   allRooms: {},
   friends: {},
   currentRoom: '',
@@ -55,33 +55,7 @@ var app = {
       type: 'GET',
       dataType: 'json',
       dataFilter: function(data) {
-        var data = JSON.parse(data);
-        // var.responseText = data.responseText;
-        // loop through each result and look at the text
-          // strip out the left bracket things
-        for (var i = 0; i < data.results.length; i++) {
-          // if there is no text in the message
-          if (!data.results[i].text) {
-            // splice out the empty message
-            data.results.splice(i,1);
-          } else {
-            var textToChange = data.results[i].text;
-            var newText = textToChange.replace(/</g, 'java');
-            var newText = newText.replace(/>/g, ' is fun! ');
-            data.results[i].text = newText;
-
-            if (!data.results[i].username) {
-              data.results[i].username = ' ';
-            }
-            var nameToChange = data.results[i].username;
-            var newName = nameToChange.replace(/</g, 'java');
-            var newName = newName.replace(/>/g, ' is fun! ');
-            data.results[i].username = newName;
-          }
-
-
-        }
-        return JSON.stringify(data);
+        return app.scrubData(data);
       },
       success: function (data) {
         console.log('fetch successful');
@@ -163,7 +137,7 @@ var app = {
 
     $.ajax({
     // This is the url you should use to communicate with the parse API server.
-      url: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt&limit=1000&where={"roomname":"' + roomName + '"}',
+      url: 'http://parse.sfs.hackreactor.com/chatterbox/classes/messages?order=-createdAt&where={"roomname":"' + roomName + '"}',
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
@@ -178,31 +152,7 @@ var app = {
         // console.log('chatterbox: Message sent');
       },
       dataFilter: function(data) {
-        var data = JSON.parse(data);
-        // var.responseText = data.responseText;
-        // loop through each result and look at the text
-          // strip out the left bracket things
-        for (var i = 0; i < data.results.length; i++) {
-          // if there is no text in the message
-          if (!data.results[i].text) {
-            // splice out the empty message
-            data.results.splice(i,1);
-          } else {
-            var textToChange = data.results[i].text;
-            var newText = textToChange.replace(/</g, 'java');
-            var newText = newText.replace(/>/g, ' is fun! ');
-            data.results[i].text = newText;
-
-            if (!data.results[i].username) {
-              data.results[i].username = ' ';
-            }
-            var nameToChange = data.results[i].username;
-            var newName = nameToChange.replace(/</g, 'java');
-            var newName = newName.replace(/>/g, ' is fun! ');
-            data.results[i].username = newName;
-          }
-        }
-        return JSON.stringify(data);
+        return app.scrubData(data);
       },
       error: function (data) {
       // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -221,6 +171,30 @@ var app = {
     };
     app.send(message);
     $('#message').val('');
+  },
+  scrubData: function(data) {
+    var data = JSON.parse(data);
+    for (var i = 0; i < data.results.length; i++) {
+      // if there is no text in the message
+      if (!data.results[i].text) {
+        // splice out the empty message
+        data.results.splice(i,1);
+      } else {
+        var textToChange = data.results[i].text;
+        var newText = textToChange.replace(/</g, 'java');
+        var newText = newText.replace(/>/g, ' is fun! ');
+        data.results[i].text = newText;
+          //  
+        if (!data.results[i].username) {
+          data.results[i].username = ' ';
+        }
+        var nameToChange = data.results[i].username;
+        var newName = nameToChange.replace(/</g, 'java');
+        var newName = newName.replace(/>/g, ' is fun! ');
+        data.results[i].username = newName;
+      }
+    }
+    return JSON.stringify(data);
   }
 };
 
